@@ -1,0 +1,2 @@
+export const IMAGE_URL =
+  "https://wkgxnauntodnondiuldq.supabase.co/storage/v1/object/sign/aigc/test_wtf.jpg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJhaWdjL3Rlc3Rfd3RmLmpwZyIsImlhdCI6MTczOTE4ODI4MywiZXhwIjoxNzM5NzkzMDgzfQ.ImbKN4pmO2yk-_P7A50fj5syOi8oqtmtqQRkjlRzn9M";

@@ -1,9 +1,10 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import { IMaskCanvasProps, IMaskCanvasRef } from "./interface";
-import { Canvas, PaintStyle, Path, Skia, StrokeCap, useCanvasRef } from "@shopify/react-native-skia";
+import { Canvas, ImageFormat, PaintStyle, Path, Skia, StrokeCap, useCanvasRef } from "@shopify/react-native-skia";
+import { WEBP } from "@/constants/mimeType";
 
 const MaskCanvas = forwardRef<IMaskCanvasRef, IMaskCanvasProps>((props, ref) => {
-  const { skiaPaths, layoutInfo } = props;
+  const { skiaPaths, aspectRatio, layoutInfo } = props;
   const paint = useRef(Skia.Paint());
   const canvasRef = useCanvasRef();
 
@@ -16,11 +17,31 @@ const MaskCanvas = forwardRef<IMaskCanvasRef, IMaskCanvasProps>((props, ref) => 
   const generateMask = async () => {
     const snapshot = await canvasRef.current?.makeImageSnapshotAsync();
     if (!snapshot) return;
-    return snapshot;
+    const originalWidth = snapshot?.width();
+    const originalHeight = snapshot?.height();
 
-    // can also encode to base64
-    // const base64 = snapshot.encodeToBase64(ImageFormat.WEBP, 80);
-    // return base64
+    const targetWidth = layoutInfo.width;
+    const targetHeight = layoutInfo.height;
+
+    const scale = Math.min(targetWidth / originalWidth, targetHeight / originalHeight);
+    // const scaledWidth = originalWidth * (targetWidth / originalWidth);
+    // const scaledHeight = originalHeight * (targetHeight / originalHeight);
+    const scaledWidth = originalWidth * scale;
+    const scaledHeight = originalHeight * scale;
+    const surface = Skia.Surface.MakeOffscreen(scaledWidth, scaledHeight);
+    if (!surface) return;
+    const canvas = surface.getCanvas();
+    const paint = Skia.Paint();
+    canvas.save();
+    canvas.scale(scale, scale);
+    canvas.drawImage(snapshot, 0, 0, paint);
+    canvas.restore();
+    const scaledSkImage = surface.makeImageSnapshot();
+    const base64 = scaledSkImage?.encodeToBase64(ImageFormat.WEBP, 100);
+    if (base64) {
+      const fullBaseString = `data:${WEBP};base64,${base64}`;
+      return fullBaseString;
+    }
   };
 
   useEffect(() => {
@@ -30,8 +51,18 @@ const MaskCanvas = forwardRef<IMaskCanvasRef, IMaskCanvasProps>((props, ref) => 
     paint.current.setColor(Skia.Color("white"));
   }, []);
 
+  if (!aspectRatio) return null;
   return (
-    <Canvas style={{ ...layoutInfo, position: "absolute" }} ref={canvasRef}>
+    <Canvas
+      style={{
+        position: "absolute",
+        borderRadius: 20,
+        backgroundColor: "black",
+        width: 300,
+        height: 300 / aspectRatio,
+      }}
+      ref={canvasRef}
+    >
       {skiaPaths.map((path) => (
         <Path key={path.toSVGString()} path={path} paint={paint.current} />
       ))}

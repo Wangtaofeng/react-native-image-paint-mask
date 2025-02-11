@@ -1,7 +1,7 @@
-import { SkImage, SkPath } from "@shopify/react-native-skia";
+import { SkImage, SkPath, SkRect } from "@shopify/react-native-skia";
 
 export interface IMaskCanvasRef {
-  generateMaskImageAsync: () => Promise<SkImage | undefined>;
+  generateMaskImageAsync: () => Promise<string | undefined>;
 }
 
 export interface IMaskCanvasProps {
@@ -10,4 +10,5 @@ export interface IMaskCanvasProps {
     width: number;
     height: number;
   };
+  aspectRatio: number;
 }

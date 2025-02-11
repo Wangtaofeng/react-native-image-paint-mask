@@ -1,18 +1,24 @@
 import { FC, useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, Path, Skia, useImage, Image, PaintStyle, StrokeCap, SkImage } from "@shopify/react-native-skia";
+import { Canvas, Path, Skia, useImage, Image, PaintStyle, StrokeCap } from "@shopify/react-native-skia";
 import { PanResponder, Pressable, Text, View, StyleSheet } from "react-native";
 import MaskCanvas from "@/components/MaskCanvas";
 import { IMaskCanvasRef } from "@/components/MaskCanvas/interface";
 import Preview from "@/components/Preview";
+import { uploadImage } from "@/libs/storage";
+import { operateImage } from "@/libs/operatImage";
+import { IMAGE_URL } from "@/constants/url";
 
 const RootLayout: FC = () => {
   const [paths, setPaths] = useState<{ x: number; y: number }[][]>([]);
   const [currentPath, setCurrentPath] = useState<{ x: number; y: number }[]>([]);
   const maskCanvasRef = useRef<IMaskCanvasRef>(null);
   const [history, setHistory] = useState<{ x: number; y: number }[][]>([]);
-  const [imageMask, setImageMask] = useState<SkImage | undefined>();
+  const [currentImageURL, setCurrentImageURL] = useState<string>(IMAGE_URL); // replace with your image
 
-  const image = useImage(require("@/assets/images/style.png")); // replace with your image
+  const image = useImage(currentImageURL);
+
+  /* mask preview, only for show case, cna delete it */
+  const [imageMask, setImageMask] = useState<string | undefined>();
 
   const undo = () => {
     const currentPaths = [...paths];
@@ -28,6 +34,13 @@ const RootLayout: FC = () => {
     if (!currentPath) return;
     setPaths((prev) => [...prev, currentPath]);
     setHistory(currentHistory);
+  };
+
+  const handleClear = () => {
+    setCurrentPath([]);
+    setPaths([]);
+    setHistory([]);
+    setImageMask(undefined);
   };
 
   const paint = useRef(Skia.Paint());
@@ -84,15 +97,19 @@ const RootLayout: FC = () => {
   }, [image]);
 
   const handleConfirm = async () => {
-    const skImage = await maskCanvasRef.current?.generateMaskImageAsync();
-    setImageMask(skImage);
-  };
-
-  const handleClear = () => {
-    setCurrentPath([]);
-    setPaths([]);
-    setHistory([]);
-    setImageMask(undefined);
+    const base64 = await maskCanvasRef.current?.generateMaskImageAsync();
+    setImageMask(base64);
+    if (!base64) return;
+    try {
+      const fileName = `wtf-${Date.now()}.webp`;
+      const signUrl = await uploadImage(base64, fileName);
+      if (!signUrl) return;
+      const operateImageRes = await operateImage(signUrl);
+      setCurrentImageURL(operateImageRes.images[0].url);
+      handleClear();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   useEffect(() => {
@@ -102,22 +119,25 @@ const RootLayout: FC = () => {
     paint.current.setColor(Skia.Color("red"));
   }, []);
 
+  const aspectRatio = layoutInfo.width / layoutInfo.height;
+
   if (!image) return null;
   return (
     <View style={styles.container}>
       <View
         style={{
           position: "relative",
-          width: layoutInfo.width,
-          height: layoutInfo.height,
+          width: 300,
+          aspectRatio,
         }}
         {...panResponder.panHandlers}
       >
-        <MaskCanvas ref={maskCanvasRef} skiaPaths={skiaPaths} layoutInfo={layoutInfo} />
+        <MaskCanvas ref={maskCanvasRef} skiaPaths={skiaPaths} aspectRatio={aspectRatio} layoutInfo={layoutInfo} />
 
         <Canvas style={styles.canvas}>
           {/* original image */}
-          {image && <Image image={image} x={0} y={0} {...layoutInfo} />}
+          {image && <Image image={image} x={0} y={0} width={300} height={300 / aspectRatio} />}
+
           {/* all drawn paths */}
           {skiaPaths.map((path, index) => (
             <Path key={index} path={path} paint={paint.current} />
@@ -145,7 +165,7 @@ const RootLayout: FC = () => {
       </View>
 
       {/* mask preview, only for show case, cna delete it */}
-      <Preview imageMask={imageMask} layoutInfo={layoutInfo} />
+      <Preview base64={imageMask} layoutInfo={layoutInfo} />
     </View>
   );
 };
@@ -166,6 +186,7 @@ const styles = StyleSheet.create({
   canvas: {
     flex: 1,
     borderRadius: 20,
+    overflow: "hidden",
   },
 });
 

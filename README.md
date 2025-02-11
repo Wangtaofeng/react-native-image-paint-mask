@@ -1,50 +1,54 @@
-# Welcome to your Expo app 👋
+| Undo Redo                                                                                     | Preview Mask                                                                                     | Generate Image                                                                               |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| ![undo-redo](https://github.com/user-attachments/assets/c5bebe03-85c4-4469-bd9d-09c3666906a6) | ![preview-mask](https://github.com/user-attachments/assets/5b919861-c70d-4761-b3c6-0b2fdca518ae) | ![generate](https://github.com/user-attachments/assets/dcde43d2-f751-48d9-90dc-87479b2315cb) |
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+---
 
-## Get started
+# Image Masking and AI Modification Demo
 
-1. Install dependencies
+This project is a demo of how to apply brush strokes on an image, generate a mask image with just the brushing information, and use AI API calls to modify specific areas of the original image. The demo is built using **Expo**, **Supabase**, **fal-ai**, and **@shopify/react-native-skia**.
+
+## Features
+
+- **Brush Stroke on Image**: Users can draw on an image, and the path of the brush stroke is used to generate a mask image.
+- **Undo and Redo**: The brush stroke actions can be undone or redone.
+- **AI Image Modification**: The mask image is combined with an AI API call to modify specific regions of the original image in a natural way.
+
+## Setup
+
+1. Install dependencies:
 
    ```bash
    bun install
    ```
 
-2. Start the app
+2. Start the app:
 
    ```bash
-    bunx expo start
+   bunx expo start
    ```
 
-In the output, you'll find options to open the app in a
+3. The app can be tested on a development build, an Android emulator, an iOS simulator, or in Expo Go.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Key Components
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- **app/\_layout.ts**: This file contains the main implementation for handling brush strokes and generating mask images.
+- **components/MaskCanvas**: Responsible for rendering the mask image based on the brush strokes applied to the canvas.
 
-## Get a fresh project
+- **libs/operatImage**: Contains logic for making API calls to modify the image using AI, applying changes based on the generated mask image.
 
-When you're ready, run:
+- **libs/storage**: Handles the storage of images and generates signed links for the stored images.
 
-```bash
-npm run reset-project
-```
+## Environment Variables
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+- Some environment variables are used for AI calls and storing images on a CDN. Ensure you configure the necessary keys and endpoints in your environment.
 
-## Learn more
+## Resources
 
-To learn more about developing your project with Expo, look at the following resources:
+- [Expo Documentation](https://docs.expo.dev/)
+- [fal-ai API Documentation](https://www.fal.ai/docs)
+- [@shopify/react-native-skia](https://github.com/Shopify/react-native-skia)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+You can copy this directly now! Let me know if you'd like to adjust anything.

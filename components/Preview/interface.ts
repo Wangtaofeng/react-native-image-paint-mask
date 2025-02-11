@@ -1,7 +1,5 @@
-import { SkImage } from "@shopify/react-native-skia";
-
 export interface IPreviewProps {
-  imageMask: SkImage | undefined;
+  base64: string | undefined;
   layoutInfo: {
     width: number;
     height: number;
