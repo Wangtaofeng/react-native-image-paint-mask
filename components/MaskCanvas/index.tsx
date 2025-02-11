@@ -1,6 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import { IMaskCanvasProps, IMaskCanvasRef } from "./interface";
-import { Canvas, ImageFormat, PaintStyle, Path, Skia, StrokeCap, useCanvasRef } from "@shopify/react-native-skia";
+import { Canvas, Fill, ImageFormat, PaintStyle, Path, Skia, StrokeCap, useCanvasRef } from "@shopify/react-native-skia";
 import { WEBP } from "@/constants/mimeType";
 
 const MaskCanvas = forwardRef<IMaskCanvasRef, IMaskCanvasProps>((props, ref) => {
@@ -57,12 +57,13 @@ const MaskCanvas = forwardRef<IMaskCanvasRef, IMaskCanvasProps>((props, ref) => 
       style={{
         position: "absolute",
         borderRadius: 20,
-        backgroundColor: "black",
+        overflow: "hidden",
         width: 300,
         height: 300 / aspectRatio,
       }}
       ref={canvasRef}
     >
+      <Fill color="black" />
       {skiaPaths.map((path) => (
         <Path key={path.toSVGString()} path={path} paint={paint.current} />
       ))}
